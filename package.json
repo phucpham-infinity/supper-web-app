@@ -1,0 +1,17 @@
+{
+  "name": "micro-webapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev:host": "pnpm --filter host run dev",
+    "dev:app1": "pnpm --filter react-app-01 run dev",
+    "build:host": "pnpm --filter host run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.0.1"
+  }
+}

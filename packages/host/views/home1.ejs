@@ -1,0 +1,135 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Micro Wepaap</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.x/css/materialdesignicons.min.css" rel="stylesheet" />
+  <link href=" /libs/vuetify.min.css" rel="stylesheet" />
+  <link href=" /libs/fa6/css/all.min.css" rel="stylesheet" />
+  <link href=" /style/loader.css" rel="stylesheet" />
+  <link href=" /style/index.css" rel="stylesheet" />
+  <link href=" /style/login-page.css" rel="stylesheet" />
+
+
+  <script src=" /libs/vue.global.js"></script>
+  <script src=" /libs/vue-router.global.js"></script>
+  <script src="/libs/vuetify.min.js"></script>
+
+  <!-- System JS -->
+  <script type="systemjs-importmap">
+      {
+        "imports": {
+          "react": "https://unpkg.com/react@18.2.0/umd/react.production.min.js",
+          "react-dom": "https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"
+        }
+      }
+  </script>
+  <script src=" /libs/system.min.js"></script>
+  <script src=" /libs/amd.min.js"></script>
+
+  <!-- Components -->
+  <script src=" /components/user-avatar.js"></script>
+  <script src=" /components/header-bar.js"></script>
+
+  <!-- Pages -->
+  <script src=" /configs.js"></script>
+  <script src=" /render-micro-app.js"></script>
+  <script src=" /app-layout.js"></script>
+  <script src=" /page-render.js"></script>
+  <script src=" /home-page.js"></script>
+  <script src=" /login-page.js"></script>
+
+
+
+  <style>
+    *:not(i) {
+      font-family: "Noto Sans", sans-serif;
+    }
+
+    body {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <router-view></router-view>
+  </div>
+
+  <script>
+    const app = Vue.createApp({})
+    const routes = [
+      {
+        path: "/",
+        component: HomePage,
+        meta: { title: "Home", requiresAuth: true },
+      },
+      {
+        path: "/login",
+        component: LoginPage,
+        meta: { title: "Login", requiresAuth: false },
+
+      },
+      {
+        path: "/register",
+        component: HomePage,
+        meta: { title: "Register", requiresAuth: false },
+      },
+      {
+        path: "/logout",
+        component: HomePage,
+        meta: {
+          title: "Logout", requiresAuth: false
+        },
+      },
+      {
+        path: "/app/:appName+",
+        component: PageRender,
+        meta: { requiresAuth: true },
+      },
+    ];
+
+    const router = VueRouter.createRouter({
+      history: VueRouter.createWebHistory(),
+      routes,
+    });
+
+    router.beforeEach((to, from, next) => {
+      // Check route requiresAuth
+      if (!to.meta.requiresAuth) return next();
+
+      // Check login
+      let isAuthenticated = false;
+      if (localStorage.getItem("LoggedUser")) isAuthenticated = true;
+      else isAuthenticated = false;
+
+      // Next to path
+      if (isAuthenticated) {
+        return next();
+      }
+      else next({ path: "/login", query: { replace: to.path } });
+    });
+
+    const { createVuetify } = Vuetify
+    const vuetify = createVuetify(CONFIGS)
+
+    const maxApi = {
+      loginWithEmailPassword: (email, password) => {
+        return fetch('/api/user/login-with-email-password', {
+          method: "POST",
+          body: JSON.stringify({ email, password }),
+        })
+      }
+    }
+    app.provide('maxApi', maxApi).use(vuetify)
+      .use(router)
+      .mount("#app");
+  </script>
+</body>
+
+</html>
